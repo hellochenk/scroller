@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>scroller</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" type="text/css" href="index.css">
+<style type="text/css">
+*{
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+.container{
+    position: relative;
+    width: 90vw;
+    height: 400px; 
+    overflow: hidden;
+    border: 1px solid #00ffff;
+    margin: 0 auto;
+}
+
+.scroller {
+    float: left;
+    height: 400px;
+}
+
+.scroller .item{
+    float: left;
+    width: 90vw;
+    height: 400px; 
+}
+.dotbox{
+    position: absolute;
+}
+.step{
+    position: absolute;
+}
+</style>
+</head>
+<body>
+    test!
+    <div id='container' class="container">   
+        <div id='box' class="scroller">
+            <div class="item child1"></div>
+            <div class="item child2"></div>
+            <div class="item child3"></div>
+        </div>
+        <div class="dotbox"></div>
+            <div class="dot dot1"></div>
+            <div class="dot dot2"></div>
+            <div class="dot dot3"></div>
+        <div class="step">
+            <div class="prev"><</div>
+            <div class="next">></div>
+        </div>
+    </div>
+</body>
+<script type="text/javascript">
+const CUSTOMBOX = {
+    width: 500,
+    height: 400
+};
+const START = {
+    startX: 0,
+    startY: 0
+};
+const BOUNCE = {
+    left: 0,
+    right: 0
+};
+const MAX = {
+    left: 80,
+    right: 0
+};
+let MOVE = 0;
+let BOX = null;
+let CONTAINER = null;
+
+window.onload = () => {
+    console.log('loader...');
+    BOX = document.getElementById('box');
+    CONTAINER = document.getElementById('container');
+    return generateBox();
+}
+
+const getColor = () => {
+    return `#${Math.floor(Math.random()*16777215).toString(16)}`;
+}
+
+const generateBox = () => {
+    const box = BOX;
+    const childList = box.children;
+    // box.style.width = `${childList.length * CUSTOMBOX.width}px`
+    box.style.width = `${childList.length * 90}vw`
+    for(let x=0;x < childList.length;x++) {
+        childList[x].style.background = getColor();
+    };
+
+    MAX.right = -(BOX.offsetWidth - CONTAINER.offsetWidth + MAX.left);
+    BOUNCE.right = -(BOX.offsetWidth - CONTAINER.offsetWidth);
+    return listenEvent();
+}
+
+const listenEvent = () => {
+    BOX.addEventListener('touchstart', handleStart);
+    BOX.addEventListener('touchmove', handleMove);
+    BOX.addEventListener('touchend', handleEnd);
+}
+
+const handleStart = (e) => {
+    BOX.style.transition = 'none';
+    START.startX = e.changedTouches[0].clientX;
+    START.startY = e.changedTouches[0].clientY;
+}
+
+const handleMove = (e) => {
+    let dy = e.changedTouches[0].clientX - START.startX;
+    let temp = MOVE+dy;
+    
+    if (temp > MAX.left) {
+        temp = MAX.left;
+    } else if (temp < MAX.right) {
+        temp = MAX.right;
+    };
+    BOX.style.transform = `translateX(${temp}px)`;
+}
+
+const handleEnd = (e) => {
+    const dy = e.changedTouches[0].clientX - START.startX;
+    MOVE += dy;
+    if (MOVE > BOUNCE.left) {
+        MOVE = BOUNCE.left;
+        BOX.style.transition = 'transform .5s';
+        BOX.style.transform = `translateX(${MOVE}px)`;
+    } else if (MOVE < BOUNCE.right) {
+        MOVE = BOUNCE.right;
+        BOX.style.transition = 'transform .5s';
+        BOX.style.transform = `translateX(${MOVE}px)`;
+    } else {
+        let index = Math.floor(MOVE / CONTAINER.offsetWidth);
+        if(dy > 0) {
+            MOVE = (index + 1)*(CONTAINER.offsetWidth);
+        } else {
+            MOVE = index*(CONTAINER.offsetWidth);
+        };
+        BOX.style.transition = 'transform .5s';
+        BOX.style.transform = `translateX(${MOVE}px)`;
+
+    }
+}
+
+</script>
+<script type="text/javascript" src="index.js"></script>
+</html>
